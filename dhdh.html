@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kevin Store Racing 3D</title>
+    <style>
+        /* CSS STYLING */
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; user-select: none; }
+        
+        /* Efek Kilat Putih saat Buka */
+        #intro-flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 9999; pointer-events: none;
+            animation: flashEffect 1s ease-out forwards;
+        }
+        @keyframes flashEffect {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+
+        /* Tampilan Menu & Layar */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center; background: rgba(0,0,0,0.85);
+            z-index: 10;
+        }
+        .hidden { display: none !important; }
+
+        h1 { font-size: 2.5rem; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; margin-bottom: 10px; text-transform: uppercase; }
+        h2 { color: #ffcc00; margin-bottom: 20px; }
+
+        /* Tombol */
+        .btn {
+            padding: 15px 30px; margin: 8px; font-size: 1.1rem; 
+            border: 2px solid #00ffcc; background: transparent; color: #00ffcc;
+            cursor: pointer; border-radius: 8px; font-weight: bold; width: 200px;
+            transition: 0.2s;
+        }
+        .btn:hover { background: #00ffcc; color: black; transform: scale(1.05); }
+        .btn-red { border-color: #ff4444; color: #ff4444; }
+        .btn-red:hover { background: #ff4444; color: white; }
+
+        /* Panel Pengaturan & Modif */
+        .panel {
+            background: #222; padding: 20px; border-radius: 15px; border: 1px solid #444;
+            max-width: 90%; width: 350px;
+        }
+        .setting-row { margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* HUD Game (Tampilan saat main) */
+        #hud {
+            background: transparent; pointer-events: none; justify-content: space-between;
+        }
+        .top-info {
+            position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 20px; 
+            border: 1px solid white; font-weight: bold; font-size: 1.2rem;
+        }
+        #money-display { color: gold; }
+        #speed-display { color: cyan; }
+
+        /* Pesan Game Over / Info */
+        #message-overlay {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 3rem; font-weight: 900; text-shadow: 3px 3px 0 #000;
+            display: none; color: red;
+        }
+
+        /* Kontrol Layar Sentuh */
+        .controls {
+            position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; pointer-events: auto;
+        }
+        .ctrl-btn {
+            width: 70px; height: 70px; background: rgba(255,255,255,0.2); border: 2px solid white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; color: white; touch-action: manipulation;
+        }
+        .ctrl-btn:active { background: rgba(0, 255, 204, 0.5); }
+        
+        .boost-btn {
+            width: 80px; height: 80px; border-color: orange; color: orange;
+            background: rgba(255, 165, 0, 0.2);
+        }
+        .boost-btn:active { background: orange; color: black; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. INTRO KILATAN CAHAYA -->
+    <div id="intro-flash"></div>
+
+    <!-- 2. MENU UTAMA -->
+    <div id="menu-screen" class="screen">
+        <h1>🏎️ KEVIN RACING 3D</h1>
+        <p>Top Up & Balapan Seru!</p>
+        <button class="btn" onclick="startGame()">▶️ START GAME</button>
+        <button class="btn" onclick="showScreen('modif-screen')">🔧 MODIF GARASI</button>
+        <button class="btn" onclick="showScreen('settings-screen')">⚙️ PENGATURAN</button>
+        <button class="btn" onclick="showScreen('tutorial-screen')">❓ TUTORIAL</button>
+    </div>
+
+    <!-- 3. MENU MODIF -->
+    <div id="modif-screen" class="screen hidden">
+        <div class="panel">
+            <h2>🔧 BENGKEL RESMI</h2>
+            <div class="setting-row">
+                <span>Ganti Velg Racing</span>
+                <input type="checkbox" id="mod-velg" onchange="applyMods()">
+            </div>
+            <div class="setting-row">
+                <span>Bumper Sport (Aerodinamis)</span>
+                <input type="checkbox" id="mod-bumper" onchange="applyMods()">
+            </div>
+            <div class="setting-row">
+                <span>Modif Mesin (Boost Kenceng)</span>
+                <input type="checkbox" id="mod-engine" onchange="applyMods()">
+            </div>
+            <div class="setting-row">
+                <span>Suspensi Ceper</span>
+                <input type="checkbox" id="mod-ceper" onchange="applyMods()">
+            </div>
+            <br>
+            <button class="btn" onclick="showScreen('menu-screen')">KEMBALI</button>
+        </div>
+    </div>
+
+    <!-- 4. PENGATURAN -->
+    <div id="settings-screen" class="screen hidden">
+        <div class="panel">
+            <h2>⚙️ PENGATURAN</h2>
+            <div class="setting-row">
+                <span>Grafik:</span>
+                <select id="gfx-select" style="padding: 5px;">
+                    <option value="low">Low (Smooth/HP Kentang)</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="ultra">Ultra (Cahaya Realistis)</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <span>Mode Layar:</span>
+                <button onclick="alert('Putar HP kamu ke samping untuk mode Landscape!')" style="padding:5px;">Potret/Landscape</button>
+            </div>
+            <br>
+            <button class="btn" onclick="saveSettings()">SIMPAN</button>
+        </div>
+    </div>
+
+    <!-- 5. TUTORIAL -->
+    <div id="tutorial-screen" class="screen hidden">
+        <div class="panel">
+            <h2>📖 CARA MAIN</h2>
+            <p style="text-align:left; font-size:0.9rem; line-height:1.5;">
+                1. 🏎️ <b>Maju Terus:</b> Mobil gas otomatis.<br>
+                2. ⬅️➡️ <b>Belok:</b> Hindari mobil XPander & Truck.<br>
+                3. 🔥 <b>Boost:</b> Tekan tombol api untuk ngebut.<br>
+                4. 💰 <b>Koin:</b> Ambil kotak kuning di jalan.<br>
+                5. 👮 <b>Polisi:</b> Kalau kelamaan, polisi ngejar!<br>
+                6. 💥 <b>Kecelakaan:</b> Kalau nabrak, game over.
+            </p>
+            <button class="btn" onclick="showScreen('menu-screen')">MENGERTI</button>
+        </div>
+    </div>
+
+    <!-- 6. TAMPILAN GAME (HUD) -->
+    <div id="game-hud" class="screen hidden" style="justify-content: flex-end;">
+        <div class="top-info">
+            <div class="stat-box">💰 <span id="ui-money">0</span></div>
+            <div class="stat-box">🚀 <span id="ui-speed">0</span> KM/H</div>
+        </div>
+        
+        <div id="message-overlay">CRASHED! 💥</div>
+
+        <div class="controls">
+            <div style="display:flex; gap:15px;">
+                <div class="ctrl-btn" ontouchstart="moveLeft(true)" ontouchend="moveLeft(false)" onmousedown="moveLeft(true)" onmouseup="moveLeft(false)">⬅️</div>
+                <div class="ctrl-btn" ontouchstart="moveRight(true)" ontouchend="moveRight(false)" onmousedown="moveRight(true)" onmouseup="moveRight(false)">➡️</div>
+            </div>
+            <div class="ctrl-btn boost-btn" ontouchstart="toggleBoost(true)" ontouchend="toggleBoost(false)" onmousedown="toggleBoost(true)" onmouseup="toggleBoost(false)">🔥</div>
+        </div>
+    </div>
+
+    <!-- LIBRARY 3D (THREE.JS) -->
